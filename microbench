@@ -1,0 +1,17 @@
+if [ $# -eq 0 ] ; then
+  echo "usage: microbench <param1=value> <param2=value> ..."
+  echo "for jmh params:  forks,warmups,warmupLength,measurements,measurementLength,producerThreads=<num>"
+  echo "for test params: opSleep=<micros to sleep>/<chance of sleeping>[,...]"
+  echo "                 opWork=<micros to work>[,...]"
+  echo "                 tasks=<in>:<out>[,<in2>:<out2>...] (ratio of input gate and executor queue size to number of threads)"
+  echo "                 type=<INJECTOR|JDK|FJP|DISRUPTOR_SPIN|DISRUPTOR_BLOCK>[,...]"
+  echo "                 threads=<worker count>[,...]"
+  echo "                 executorChainLength=<number of work/executor stages>[,...]"
+  echo "e.g. microbench forks=1 warmups=5 warmupLength=1 measurements=5 measurementLength=1 producerThreads=1"
+  echo "                opSleep=0/0 opWork=1,10,100 tasks=0.5:1,1:1,2:2,4:4 type=INJECTOR,JDK threads=32,128,512 executorChainLength=1"
+  echo " (these are the default parameters; any omitted will take the value presented, except opSleep which includes 10/0.1 for illustrative purposes)"
+  exit 1
+fi
+mvn -DskipTests=true package
+mvn dependency:copy-dependencies
+java -cp "target/*:target/dependency/*" bes.injector.microbench.ExecutorBenchmark $*
