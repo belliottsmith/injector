@@ -125,18 +125,7 @@ public class InjectionExecutor extends AbstractExecutorService
         if (shutdown && tasks.remove(task))
             throw new RejectedExecutionException();
 
-        long update;
-        while (true)
-        {
-            long current = this.permits.get();
-            update = current + 1;
-
-            // because there is no difference in practical terms between the work permit being added or not
-            // (the work is already in existence), we always add our permit, but block after the fact if we
-            // breached the queue limit
-            if (permits.compareAndSet(current, update))
-                break;
-        }
+        long update = this.permits.incrementAndGet();
 
         if (taskPermits(update) == 1)
         {
